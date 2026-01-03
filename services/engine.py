@@ -11,7 +11,7 @@ class GameEngine:
         """
         راه‌اندازی اولیه بازی
         """
-        # ساخت ۴ بازیکن طبق داکیومنت
+        # 1. ساخت ۴ بازیکن طبق داکیومنت
         self.players = {
             "p1": Player("p1", "Sylvanas Windrunner"),
             "p2": Player("p2", "The Lich King"),
@@ -22,10 +22,15 @@ class GameEngine:
         # فعلاً فرض می‌کنیم ما بازیکن ۱ هستیم
         self.current_player_id = "p1"
         self.shop = Shop()
-        self.turn = 1
         
-        # شروع بازی با پر کردن شاپ
+        # 2. متغیرهای مربوط به نوبت و فاز (بخش جدید)
+        self.turn = 1
+        self.phase = "RECRUIT"  # فازهای بازی: 'RECRUIT' یا 'COMBAT'
+        self.combat_data = []   # برای ذخیره نتیجه جنگ
+        
+        # 3. شروع بازی
         self.start_turn()
+     
 
     def start_turn(self):
         """
@@ -43,7 +48,25 @@ class GameEngine:
         else:
             # اگر فریز بود، برای نوبت بعد آنفریز کن (مگر اینکه بازیکن دوباره فریز کند)
             self.shop.frozen = False 
+    def switch_phase(self):
+        """
+        تغییر فاز بین خرید و جنگ طبق دیاگرام State Machine
+        """
+        if self.phase == "RECRUIT":
+            print(f"--- Turn {self.turn} Recruit Phase Ended ---")
+            print(">>> Starting COMBAT Phase...")
+            self.phase = "COMBAT"
+            
+            # نکته برای بعد: اینجا باید تابع start_combat از کد نفر سوم صدا زده شود.
+            # فعلاً فقط فاز را عوض می‌کنیم.
 
+        elif self.phase == "COMBAT":
+            print(">>> Combat finished! Back to RECRUIT Phase...")
+            self.phase = "RECRUIT"
+            
+            # رفتن به نوبت بعد
+            self.turn += 1
+            self.start_turn() # پول دادن و رفرش شاپ
     def refresh_shop(self, player: Player, is_free_start=False):
         """
         عوض کردن کارت‌های داخل شاپ
