@@ -1,0 +1,12 @@
+{
+  "tier1": [
+    { "name": "Alleycat", "attack": 1, "health": 1, "keywords": ["Beast"] },
+    { "name": "Scallywag", "attack": 2, "health": 1, "keywords": ["Pirate"] },
+    { "name": "Wrath Weaver", "attack": 1, "health": 3, "keywords": ["Demon"] }
+  ],
+  "tier2": [
+    { "name": "Kaboom Bot", "attack": 2, "health": 2, "keywords": ["Mech", "Deathrattle"] },
+    { "name": "Leapfrogger", "attack": 3, "health": 3, "keywords": ["Beast"] },
+    { "name": "Party Elemental", "attack": 2, "health": 2, "keywords": ["Elemental"] }
+  ]
+}
