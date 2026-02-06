@@ -5,8 +5,9 @@ import os
 
 class AssetManager:
     def __init__(self):
-        self.images = {}
         pygame.font.init()
+        self.images = {}
+        
         self.font_small = pygame.font.SysFont('Arial', 14, bold=True)
         self.font_big = pygame.font.SysFont('Arial', 22, bold=True)
 
@@ -15,7 +16,7 @@ class AssetManager:
         path = os.path.join("images", "misc", name)
         if os.path.exists(path):
             img = pygame.image.load(path).convert_alpha()
-            self.images[name] = img
-            return img
         else:
-            surf = pygame.Surface((60, 60)); surf.fill((255, 0, 255)); return surf
+            img = pygame.Surface((60,60)); img.fill((255,0,255))
+        self.image[name] = img
+        return img
