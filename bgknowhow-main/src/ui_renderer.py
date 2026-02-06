@@ -16,7 +16,7 @@ class UIRenderer:
         self.screen.blit(self.assets.font_small.render(f"{m.attack}/{m.health}", True, BLACK), (m.rect.x+10, m.rect.y+120))
 
 
-    def draw(self, player, buttons):
+    def draw_game(self, player, buttons):
         self.screen.fill(WHITE)
         info = f"Turn {player.turn} | Gold {player.gold}/{player.max_gold} | Tavern {player.tavern_tier}"
         self.screen.blit(self.assets.font_big.render(info, True, BLACK), (20,10))
