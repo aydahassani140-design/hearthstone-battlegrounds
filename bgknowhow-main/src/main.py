@@ -6,11 +6,14 @@ from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from src.game_engine import GameEngine
 from src.asset_loader import AssetManager
 from src.ui_renderer import UIRenderer
+from src.combat_engine import CombatEngine
+from src.models import Player
 
 
 RED = (200, 50, 50)
 GREEN = (50, 200, 50)
 PURPLE_TIER = (150, 50, 200)
+YELLOW_COMBAT = (200, 200, 50)
 
 
 def main():
@@ -19,7 +22,12 @@ def main():
     pygame.display.set_caption("Sylvanas Battlegrounds - Team Project Phase 1")
     clock = pygame.time.Clock()
 
+    
     engine = GameEngine()
+    engine.player2 = Player("AI_Opponent")  # Mock Player برای تست Combat
+    
+    engine.player2.board = [m for m in engine.player2.board]  
+
     assets = AssetManager()
     renderer = UIRenderer(screen, assets)
 
@@ -27,7 +35,8 @@ def main():
     buttons = {
         "upgrade": {"rect": pygame.Rect(600, 5, 180, 50), "color": PURPLE_TIER},
         "refresh": {"rect": pygame.Rect(800, 5, 120, 50), "color": GREEN},
-        "end_turn": {"rect": pygame.Rect(950, 5, 150, 50), "color": RED}
+        "end_turn": {"rect": pygame.Rect(950, 5, 150, 50), "color": RED},
+        "combat": {"rect": pygame.Rect(1120, 5, 150, 50), "color": YELLOW_COMBAT}
     }
 
     running = True
@@ -36,6 +45,7 @@ def main():
         buttons["upgrade"]["text"] = f"Upgrade ({engine.player.upgrade_cost}g)"
         buttons["refresh"]["text"] = "Refresh (1g)"
         buttons["end_turn"]["text"] = "End Turn"
+        buttons["combat"]["text"] = "Start Combat"
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -53,6 +63,17 @@ def main():
                         engine.refresh_shop()
                     elif buttons["end_turn"]["rect"].collidepoint(pos):
                         engine.start_next_turn()
+                    elif buttons["combat"]["rect"].collidepoint(pos):
+                        
+                        combat = CombatEngine(engine.player, engine.player2, seed=12345)
+                        combat.perform_combat()
+                        print("=== Combat Finished ===")
+                        print(f"{engine.player.name} HP: {combat.p1.hp}")
+                        print(f"{engine.player2.name} HP: {combat.p2.hp}")
+
+                        
+                        engine.player.board = []
+                        engine.player2.board = []
 
                     
                     for card in engine.player.shop[:]:
