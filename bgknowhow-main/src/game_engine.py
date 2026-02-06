@@ -1,36 +1,68 @@
 # src/game_engine.py
+
 import json
 import random
-import pygame # برای ساخت Rect
+import pygame
+import os
+
 from src.models import Minion, Player
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))      
+PROJECT_ROOT = os.path.dirname(BASE_DIR)                  
+DATA_PATH = os.path.join(PROJECT_ROOT, "data", "minions.json")
+
 
 class GameEngine:
     def __init__(self):
         self.player = Player()
-        with open("data/minions.json", "r") as f:
-            self.minion_pool = json.load(f)
-        self.refresh_shop()
+
+        # Load minion pool safely
+        try:
+            with open(DATA_PATH, "r", encoding="utf-8") as f:
+                self.minion_pool = json.load(f)
+        except FileNotFoundError:
+            raise RuntimeError(
+                f"minions.json not found!\nExpected at: {DATA_PATH}"
+            )
+
+        self.refresh_shop(free=True)
 
     def start_next_turn(self):
         self.player.turn += 1
         self.player.max_gold = min(10, 2 + self.player.turn)
         self.player.gold = self.player.max_gold
-        if self.player.upgrade_cost > 0: self.player.upgrade_cost -= 1
-        self.refresh_shop()
 
-    def refresh_shop(self):
+        # discount upgrade cost (min 2)
+        if self.player.upgrade_cost > 2:
+            self.player.upgrade_cost -= 1
+
+        self.refresh_shop(free=True)
+
+    def refresh_shop(self, free=False):
+        if not free:
+            if self.player.gold < 1:
+                return
+            self.player.gold -= 1
+
         shop_size = 3 + (self.player.tavern_tier // 2)
-        self.player.shop = []
-        available_minions = self.minion_pool.get(f"tier{self.player.tavern_tier}", [])
-        if not available_minions: available_minions = self.minion_pool["tier1"] # Fallback
+        self.player.shop.clear()
+
+        available = self.minion_pool.get(
+            f"tier{self.player.tavern_tier}",
+            self.minion_pool.get("tier1", [])
+        )
 
         for i in range(shop_size):
-            minion = Minion(random.choice(available_minions))
-            minion.rect = pygame.Rect(100 + (i * 130), 120, 110, 150)
+            minion = Minion(random.choice(available))
+            minion.rect = pygame.Rect(100 + i * 130, 120, 110, 150)
             self.player.shop.append(minion)
 
     def upgrade_tavern(self):
-        if self.player.gold >= self.player.upgrade_cost and self.player.tavern_tier < 6:
+        if (
+            self.player.gold >= self.player.upgrade_cost
+            and self.player.tavern_tier < 6
+        ):
             self.player.gold -= self.player.upgrade_cost
             self.player.tavern_tier += 1
             self.player.upgrade_cost = 5 + self.player.tavern_tier
@@ -50,7 +82,9 @@ class GameEngine:
             self._update_board_positions()
 
     def _update_hand_positions(self):
-        for i, m in enumerate(self.player.hand): m.rect.topleft = (100 + (i * 130), 320)
+        for i, m in enumerate(self.player.hand):
+            m.rect.topleft = (100 + i * 130, 320)
 
     def _update_board_positions(self):
-        for i, m in enumerate(self.player.board): m.rect.topleft = (100 + (i * 130), 520)
+        for i, m in enumerate(self.player.board):
+            m.rect.topleft = (100 + i * 130, 520)
